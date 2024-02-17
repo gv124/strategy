@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 import mplfinance as mpf
-import matplotlib.pyplot as plt
+from mplfinance.plotting import plotly as mpf_plotly
+import plotly.express as px
 
 def calculate_macd(data, short_window=12, long_window=26, signal_window=9):
     short_ema = data['Close'].ewm(span=short_window, adjust=False).mean()
@@ -27,12 +28,14 @@ end_date = st.sidebar.date_input('Select End Date', pd.to_datetime("2024-02-16")
 # Fetch data
 df = get_data(symbol, start_date, end_date, "1d")
 
-# Plotting candlestick chart
-st.write("## Candlestick Chart")
-st.plotly_chart(mpf.plot(df, type='candle', style='nightclouds', title='Candlestick Chart', ylabel='Price'))
-
 # Calculate MACD
 macd_line, signal_line, macd_histogram = calculate_macd(df)
+
+# Plotting candlestick chart using mplfinance with plotly backend
+fig, ax = mpf_plotly.plot(df, type='candle', style='nightclouds', title='Candlestick Chart', ylabel='Price')
+
+# Display the candlestick chart
+st.plotly_chart(fig)
 
 # Plotting MACD
 st.write("## MACD Indicator")
@@ -54,4 +57,5 @@ ax.set_xlabel('Date')
 ax.set_ylabel('Price')
 ax.legend()
 
+# Display the MACD plot
 st.pyplot(fig)
