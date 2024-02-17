@@ -36,6 +36,7 @@ pandas==2.1.2
 pandas-ta==0.3.14b0
 peewee==3.17.0
 Pillow==10.1.0
+plotly==5.19.0
 protobuf==4.25.2
 pyarrow==14.0.2
 pydeck==0.8.1b0
