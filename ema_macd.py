@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import yfinance as yf
-import mplfinance as mpf
-from mplfinance.plotting import plotly as mpf_plotly
+import plotly.graph_objects as go
 import plotly.express as px
 
 def calculate_macd(data, short_window=12, long_window=26, signal_window=9):
@@ -31,31 +30,29 @@ df = get_data(symbol, start_date, end_date, "1d")
 # Calculate MACD
 macd_line, signal_line, macd_histogram = calculate_macd(df)
 
-# Plotting candlestick chart using mplfinance with plotly backend
-fig, ax = mpf_plotly.plot(df, type='candle', style='nightclouds', title='Candlestick Chart', ylabel='Price')
+# Plotting candlestick chart using Plotly
+fig = go.Figure(data=[go.Candlestick(x=df.index,
+                open=df['Open'],
+                high=df['High'],
+                low=df['Low'],
+                close=df['Close'])])
 
 # Display the candlestick chart
 st.plotly_chart(fig)
 
 # Plotting MACD
 st.write("## MACD Indicator")
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.plot(macd_line.index, macd_line, label='MACD Line', color='orange')
-ax.plot(signal_line.index, signal_line, label='Signal Line', color='green')
+fig.add_trace(go.Scatter(x=macd_line.index, y=macd_line, mode='lines', name='MACD Line', line=dict(color='orange')))
+fig.add_trace(go.Scatter(x=signal_line.index, y=signal_line, mode='lines', name='Signal Line', line=dict(color='green')))
 
 # Plot the histogram with different shades for positive and negative values
 for i in range(1, len(macd_histogram)):
     if macd_histogram.iloc[i] >= 0:
         color = 'darkgreen' if macd_histogram.iloc[i] >= macd_histogram.iloc[i - 1] else 'lightgreen'
-        ax.bar(macd_histogram.index[i], macd_histogram.iloc[i], color=color, alpha=0.5)
     else:
         color = 'darkred' if macd_histogram.iloc[i] <= macd_histogram.iloc[i - 1] else 'lightcoral'
-        ax.bar(macd_histogram.index[i], macd_histogram.iloc[i], color=color, alpha=0.5)
 
-ax.set_title('MACD Indicator')
-ax.set_xlabel('Date')
-ax.set_ylabel('Price')
-ax.legend()
+    fig.add_trace(go.Bar(x=[macd_histogram.index[i]], y=[macd_histogram.iloc[i]], marker_color=color, opacity=0.5))
 
-# Display the MACD plot
-st.pyplot(fig)
+fig.update_layout(title='MACD Indicator', xaxis_title='Date', yaxis_title='Price', showlegend=True)
+st.plotly_chart(fig)
