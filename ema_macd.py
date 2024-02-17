@@ -39,7 +39,7 @@ macd_line, signal_line, macd_histogram = calculate_macd(df)
 
 # Plotting MACD
 st.write("## MACD Indicator")
-fig, ax = plt.subplots(figsize=(10, 6))
+fig, ax = plt.subplots(figsize=(10, 6), facecolor='black')
 ax.plot(macd_line.index, macd_line, label='MACD Line', color='orange')
 ax.plot(signal_line.index, signal_line, label='Signal Line', color='green')
 
