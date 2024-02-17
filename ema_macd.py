@@ -30,15 +30,15 @@ df = get_data(symbol, start_date, end_date, "1d")
 # Calculate MACD
 macd_line, signal_line, macd_histogram = calculate_macd(df)
 
-# Plotting candlestick chart using Plotly
-fig = go.Figure(data=[go.Candlestick(x=df.index,
-                open=df['Open'],
-                high=df['High'],
-                low=df['Low'],
-                close=df['Close'])])
+# # Plotting candlestick chart using Plotly
+# fig = go.Figure(data=[go.Candlestick(x=df.index,
+#                 open=df['Open'],
+#                 high=df['High'],
+#                 low=df['Low'],
+#                 close=df['Close'])])
 
-# Display the candlestick chart
-st.plotly_chart(fig)
+# # Display the candlestick chart
+# st.plotly_chart(fig)
 
 # Plotting MACD
 st.write("## MACD Indicator")
