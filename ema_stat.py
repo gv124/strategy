@@ -130,6 +130,8 @@ interval = st.sidebar.selectbox("Select time interval", ["5m", "15m", "30m", "1h
 tp_pct = st.sidebar.number_input("input tp pct")
 sl_pct = st.sidebar.number_input("input sl pct", key= 1)
 pv = st.sidebar.number_input("enter portfolio value")
+ema = st.sidebar.number_input("enter ema value ")
+
 
 tp_pct = tp_pct/100
 sl_pct = sl_pct/100
@@ -154,7 +156,7 @@ if st.sidebar.button('Run Strategy'):
     st.subheader("Historical Data")
     st.dataframe(df)
     # Calculate 21 EMA
-    df['EMA21'] = df['Close'].ewm(span=21, adjust=False).mean()
+    df['EMA21'] = df['Close'].ewm(span=ema, adjust=False).mean()
 
     # Run trading strategy
     strategy_results = run_trading_strategy(df, tp_pct, sl_pct, pv)
