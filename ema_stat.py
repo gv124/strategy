@@ -1,12 +1,14 @@
+
+
 from datetime import date, timedelta
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import yfinance as yf
 
-def run_trading_strategy(df, initial_portfolio_value=100, tp_pct=0.005, sl_pct=0.05):
+def run_trading_strategy(df, tp_pct, sl_pct, pv):
     # Initialize portfolio value
-    portfolio_value = initial_portfolio_value
+    portfolio_value = pv
 
     # Initialize position state
     position = 'flat'
@@ -113,7 +115,7 @@ def run_trading_strategy(df, initial_portfolio_value=100, tp_pct=0.005, sl_pct=0
         "exit_without_tp_sl_short_losing_trades": exit_without_tp_sl_short_losing_trades,
         "total_profit": total_profit,
         "total_loss": total_loss,
-        "initial_portfolio_value": initial_portfolio_value,
+        "initial_portfolio_value": pv,
         "final_portfolio_value": portfolio_value
     }
 
@@ -122,10 +124,12 @@ st.title('Trading Strategy Streamlit App')
 
 # Sidebar inputs
 symbol = st.sidebar.text_input('Enter symbol (e.g., btc-usd):', 'btc-usd')
-start_date = st.sidebar.text_input('Enter start date (YYYY-MM-DD):', '2024-01-10')
-end_date = st.sidebar.text_input('Enter end date (YYYY-MM-DD):', '2024-03-01')
+start_date = st.sidebar.date_input('Enter start date (YYYY-MM-DD):')
+end_date = st.sidebar.date_input('Enter end date (YYYY-MM-DD):')
 interval = st.sidebar.selectbox("Select time interval", ["5m", "15m", "30m", "1h", "1d"])
-
+tp_pct = st.sidebar.number_input("input tp pct")
+sl_pct = st.sidebar.number_input("input sl pct", key= 1)
+pv = st.sidebar.number_input("enter portfolio value")
 # Run trading strategy on button click
 if st.sidebar.button('Run Strategy'):
     if interval == "5m" or interval == "15m" or interval == "30m":
@@ -150,7 +154,7 @@ if st.sidebar.button('Run Strategy'):
     df['EMA21'] = df['Close'].ewm(span=21, adjust=False).mean()
 
     # Run trading strategy
-    strategy_results = run_trading_strategy(df)
+    strategy_results = run_trading_strategy(df, tp_pct, sl_pct, pv)
 
     # Display trading statistics
     st.subheader('Trading Statistics')
