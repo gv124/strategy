@@ -130,6 +130,9 @@ interval = st.sidebar.selectbox("Select time interval", ["5m", "15m", "30m", "1h
 tp_pct = st.sidebar.number_input("input tp pct")
 sl_pct = st.sidebar.number_input("input sl pct", key= 1)
 pv = st.sidebar.number_input("enter portfolio value")
+
+tp_pct = tp_pct/100
+sl_pct = sl_pct/100
 # Run trading strategy on button click
 if st.sidebar.button('Run Strategy'):
     if interval == "5m" or interval == "15m" or interval == "30m":
