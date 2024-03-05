@@ -24,6 +24,19 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
     exit_without_tp_sl_short_losing_trades = 0
     total_profit = 0
     total_loss = 0
+    
+    # Lists to store trading information
+    trades_data = {
+        "Date": [],
+        "Position": [],
+        "Entry Price": [],
+        "Exit Price": [],
+        "Take Profit": [],
+        "Stop Loss": [],
+        "Portfolio Value": [],
+        "reason": []
+    }
+
 
     # Trading strategy conditions
     for i in range(2, len(df)):
@@ -42,6 +55,17 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
                 position_size = portfolio_value / df['Close'][i]
                 # Update portfolio value after buying
                 portfolio_value -= position_size * entry_price
+                
+                # Store trade information
+                trades_data["Date"].append(df.index[i])
+                trades_data["Position"].append(position)
+                trades_data["Entry Price"].append(entry_price)
+                trades_data["Exit Price"].append(None)
+                trades_data["Take Profit"].append(entry_price * (1 + tp_pct))
+                trades_data["Stop Loss"].append(entry_price * (1 - sl_pct))
+                trades_data["reason"].append(None)
+                trades_data["Portfolio Value"].append(portfolio_value)
+                
             elif (
                 df['Close'][i] <= df['EMA21'][i] and
                 df['Close'][i-1] < df['EMA21'][i-1] and
@@ -56,6 +80,16 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
                 position_size = portfolio_value / df['Close'][i]
                 # Update portfolio value after short selling
                 portfolio_value += position_size * entry_price
+                
+                # Store trade information
+                trades_data["Date"].append(df.index[i])
+                trades_data["Position"].append(position)
+                trades_data["Entry Price"].append(entry_price)
+                trades_data["Exit Price"].append(None)
+                trades_data["Take Profit"].append(entry_price * (1 - tp_pct))
+                trades_data["Stop Loss"].append(entry_price * (1 + sl_pct))
+                trades_data["reason"].append(None)
+                trades_data["Portfolio Value"].append(portfolio_value)
 
         elif position == 'long':
             if df["High"][i] >= (entry_price * (1 + tp_pct)):
@@ -65,6 +99,12 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
 
                 # Update portfolio value after selling
                 portfolio_value += position_size * df["High"][i]
+                
+                # Update trade information
+                trades_data["Exit Price"][-1] = df["High"][i]
+                trades_data["Portfolio Value"][-1] = portfolio_value
+                trades_data["reason"][-1] = "long_tp_hit"
+                
             elif df["Low"][i] <= (entry_price * (1 - sl_pct)):
                 position = 'flat'
                 long_losing_trades += 1
@@ -72,6 +112,12 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
 
                 # Update portfolio value after selling
                 portfolio_value += position_size * df["Low"][i]
+                
+                # Update trade information
+                trades_data["Exit Price"][-1] = df["Low"][i]
+                trades_data["Portfolio Value"][-1] = portfolio_value
+                trades_data["reason"][-1] = "long_sl_hit"
+                
             elif df['High'][i] < df['EMA21'][i-1]:
                 position = 'flat'
                 exit_without_tp_sl_long_losing_trades += 1
@@ -79,6 +125,12 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
 
                 # Update portfolio value after selling
                 portfolio_value += position_size * df['EMA21'][i-1]
+                
+                
+                # Update trade information
+                trades_data["Exit Price"][-1] = df['EMA21'][i-1]
+                trades_data["Portfolio Value"][-1] = portfolio_value
+                trades_data["reason"][-1] = "long_na_tp_sl"
 
         elif position == 'short':
             if df["Low"][i] <= (entry_price * (1 - tp_pct)):
@@ -88,6 +140,12 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
 
                 # Update portfolio value after covering
                 portfolio_value -= position_size * df["Low"][i]
+                
+                # Update trade information
+                trades_data["Exit Price"][-1] = df["Low"][i]
+                trades_data["Portfolio Value"][-1] = portfolio_value
+                trades_data["reason"][-1] = "short_tp_hit"
+                
             elif df["High"][i] >= (entry_price * (1 + sl_pct)):
                 position = 'flat'
                 short_losing_trades += 1
@@ -95,6 +153,12 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
 
                 # Update portfolio value after covering
                 portfolio_value -= position_size * df["High"][i]
+                
+                # Update trade information
+                trades_data["Exit Price"][-1] = df["High"][i]
+                trades_data["Portfolio Value"][-1] = portfolio_value
+                trades_data["reason"][-1] = "short_sl_hit"
+                
             elif df['Low'][i] > df['EMA21'][i-1]:
                 position = 'flat'
                 exit_without_tp_sl_short_losing_trades += 1
@@ -102,8 +166,16 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
 
                 # Update portfolio value after covering
                 portfolio_value -= position_size * df['EMA21'][i-1]
+                
+                # Update trade information
+                trades_data["Exit Price"][-1] = df['EMA21'][i-1]
+                trades_data["Portfolio Value"][-1] = portfolio_value
+                trades_data["reason"][-1] = "short_na_tp_sl"
 
-    # Return trading statistics and final portfolio value
+    # Create DataFrame from trades_data
+    trades_df = pd.DataFrame(trades_data)
+    
+    # Return trading statistics, final portfolio value, and trades DataFrame
     return {
         "long_trades": long_trades,
         "short_trades": short_trades,
@@ -116,7 +188,8 @@ def run_trading_strategy(df, tp_pct, sl_pct, pv):
         "total_profit": total_profit,
         "total_loss": total_loss,
         "initial_portfolio_value": pv,
-        "final_portfolio_value": portfolio_value
+        "final_portfolio_value": portfolio_value,
+        "trades_data": trades_df
     }
 
 # Streamlit App
@@ -131,8 +204,6 @@ tp_pct = st.sidebar.number_input("input tp pct")
 sl_pct = st.sidebar.number_input("input sl pct", key= 1)
 pv = st.sidebar.number_input("enter portfolio value")
 ema = st.sidebar.number_input("enter ema value ")
-
-
 tp_pct = tp_pct/100
 sl_pct = sl_pct/100
 # Run trading strategy on button click
@@ -175,3 +246,9 @@ if st.sidebar.button('Run Strategy'):
     st.write("Total loss:", strategy_results["total_loss"])
     st.write("Initial Portfolio Value:", strategy_results["initial_portfolio_value"])
     st.write("Final Portfolio Value:", strategy_results["final_portfolio_value"])
+    # Access the trades DataFrame
+    trades_df = strategy_results["trades_data"]
+
+    # Display the trades DataFrame
+    st.subheader('Trades Data')
+    st.dataframe(trades_df)
