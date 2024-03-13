@@ -54,7 +54,6 @@ six==1.16.0
 smmap==5.0.1
 soupsieve==2.5
 streamlit==1.30.0
-TA-Lib @ file:///C:/Users/rajni/Downloads/TA_Lib-0.4.28-cp312-cp312-win_amd64.whl#sha256=282177f7fe615ae91edf0064fb3b40bd5ce039dd3311a72a8c5030b6adddb1c4
 tenacity==8.2.3
 toml==0.10.2
 toolz==0.12.0
