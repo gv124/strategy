@@ -197,7 +197,7 @@ def simulate_trades(data, trade_dir, ema, take_profit, stop_loss):
                         trades_data["Portfolio Value"][-1] = portfolio
                         trades_data["exit_date"][-1] = df.index[i]
 
-                    elif short_sl <= df["High"][i]:
+                    elif short_sl >= df["High"][i]:
                         status = "not in trade"
                         short_sl_hit += 1
                         portfolio -= portfolio_value * new_short_sl * leverage
