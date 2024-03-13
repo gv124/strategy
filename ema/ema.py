@@ -304,7 +304,7 @@ def main():
     st.title("Trading Strategy Analyzer")
 
     # Sidebar inputs
-    start_date = st.sidebar.date_input("Start Date", datetime.date(2023, 1, 1))
+    start_date = st.sidebar.date_input("Start Date", datetime.date(2022, 4, 1))
     end_date = st.sidebar.date_input("End Date")
     symbol = st.sidebar.text_input("Symbol", value="BTC-USD")
     trade_dir = st.sidebar.selectbox("Trade Direction", ["long", "short", "both"])
