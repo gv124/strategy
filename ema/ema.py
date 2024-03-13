@@ -309,7 +309,7 @@ def main():
     symbol = st.sidebar.text_input("Symbol", value="BTC-USD")
     trade_dir = st.sidebar.selectbox("Trade Direction", ["long", "short", "both"])
     ema = st.sidebar.number_input("EMA", value=200)
-    take_profit = st.sidebar.slider("Take Profit (%)", 0, 10, 5)
+    take_profit = st.sidebar.slider("Take Profit (%)", 0.5, 10, 5)
     stop_loss = st.sidebar.slider("Stop Loss (%)", 0, 10, 5)
 
     # Get data
